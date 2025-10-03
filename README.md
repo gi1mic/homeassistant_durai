@@ -1,14 +1,34 @@
-# homeassistant_durai
-Homeassistant integration for Duracell/CYD Skyline/Midnite AIO Inverters using esphome 
+# ESPhome for Duracell Durai Solar Inverters
 
-
-
-Esphome config to connect a Duracell Durai Inverter into homeassistant
-Should also work with similar CYG Skyline based inverters such as the MidNite AIO 
+ESPhome configuration for monitoring and control of Duracell/CYD Skyline/Midnite AIO inverters in Home Assistant. 
 
 The register maps where taken from https://github.com/iPeel/HA-Skyline/tree/main
 and my thanks goes out to iPeel who created the above project.
 
-This project requires an ESP32 and a low cost RS232 to RS485 adapter
- 
-A Liligo LILYGO T-CAN485 or a Waveshare ESP32-S3-RS485-CAN should work but may need the UART pins changed
+
+# Known issues
+* MPTT voltages read as zero
+* System and battery temps read as zero
+
+
+
+# Requirements
+
+*    ESP32
+*    TTL To RS485 Module with automatic flow control
+
+![alt text](https://github.com/gi1mic/homeassistant_durai/blob/main/images/rs485%20connection.jpg "RS485 Wiring")
+
+RX and TX pins are connected to the ESP32 pins 16 and 17 or a Liligo LILYGO T-CAN485 or a Waveshare ESP32-S3-RS485-CAN should work but may need the UART pins changed
+
+![alt text](https://github.com/gi1mic/homeassistant_durai/blob/main/images/ESP32-S3-RS485-CAN.avif "Waveshare ESP32-S3-RS485-CAN")
+![alt text](https://github.com/gi1mic/homeassistant_durai/blob/main/images/LILYGO%20T-CAN485%20ESP32%20CAN%20RS-485.avif "Lilygo")
+
+
+# Installation
+
+*    Create your esp32 in esphome in home assistant using the yaml file (make sure you have your wifi ssid&password in the secrets and set the API and OTA passwords in the yaml file)
+*    Upload the the compiled code via. usb to the ESP32
+*    Test wireless upload
+*    Edit the sensor names in the config if you like
+*    Re-upload via wireless and test
