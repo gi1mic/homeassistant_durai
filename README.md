@@ -1,8 +1,8 @@
-# ESPhome for Duracell Durai Solar Inverters
+# ESPhome integration for Duracell Durai Solar Inverters
 
 ESPhome configuration for monitoring and control of Duracell/CYD Skyline/Midnite AIO inverters in Home Assistant. 
 
-The register maps where taken from https://github.com/iPeel/HA-Skyline/tree/main
+The register maps were taken from https://github.com/iPeel/HA-Skyline/tree/main
 and my thanks goes out to iPeel who created the above project.
 
 
