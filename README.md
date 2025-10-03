@@ -6,8 +6,10 @@ The register maps were taken from https://github.com/iPeel/HA-Skyline/tree/main
 and my thanks goes out to iPeel who created the above project.
 
 
+
 # Known issues
-* MPTT voltages read as zero
+* This is a work in progress, the data may not be correct!!!!!
+* * MPTT voltages read as zero
 * System and battery temps read as zero
 
 
