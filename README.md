@@ -9,7 +9,7 @@ and my thanks goes out to iPeel who created the above project.
 
 # Known issues
 * This is a work in progress, the data may not be correct!!!!!
-* * MPTT voltages read as zero
+* MPTT voltages read as zero
 * System and battery temps read as zero
 
 
