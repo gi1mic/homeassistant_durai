@@ -52,11 +52,6 @@ uart:
   parity: NONE
   stop_bits: 1
 
-# During the first hours of the day, the inverter can power on and off multiple times per minute until there is enough sunlight.
-# We don't want this to trigger safe-mode and possibly delay any valid readings.
-safe_mode:
-  disabled: True
-
 # Required for total_daily_energy.
 time:
   - platform: sntp
@@ -73,8 +68,8 @@ modbus_controller:
     address: 0x1
     modbus_id: mod_bus
     setup_priority: -10
-# Setting a value lower than 10s causes issues with the phone app/cloud sync
-# Could improve this by reading the registers block mode rather than individually but thats for another time
+# Setting a lower update_value may cause issues with the phone app/cloud sync
+# This could be improved by block reading the registers rather than individually but thats for another time
     update_interval: 10s
 
 sensor:
@@ -264,7 +259,8 @@ sensor:
     state_class: measurement
     accuracy_decimals: 2
     lambda: |-
-      return id(eps_load_l1).state;
+      return id(eps_load_l1).state;  
+# Three phase inverter
 #      return id(eps_load_l1).state + id(eps_load_l2).state + id(eps_load_l3).state;
 
   # Battery Sensors (0x2000 range)
@@ -282,7 +278,7 @@ sensor:
   # Battery Voltage
   - platform: modbus_controller
     modbus_controller_id: skyline
-    name: "Battery Voltage"
+    name: "Bat Voltage"
     id: battery_voltage
     register_type: holding
     address: 0x2006
@@ -296,7 +292,7 @@ sensor:
   # Battery Current
   - platform: modbus_controller
     modbus_controller_id: skyline
-    name: "Battery Current"
+    name: "Bat Current"
     id: battery_current
     register_type: holding
     address: 0x2007
@@ -313,7 +309,7 @@ sensor:
   # Battery Power
   - platform: modbus_controller
     modbus_controller_id: skyline
-    name: "Battery Load"
+    name: "Bat Load"
     id: battery_load
     register_type: holding
     address: 0x2009
@@ -330,7 +326,7 @@ sensor:
   # Battery Energy In Today
   - platform: modbus_controller
     modbus_controller_id: skyline
-    name: "Battery Energy In Today"
+    name: "Bat Energy In Today"
     skip_updates: 10
     id: battery_energy_in_today
     register_type: holding
@@ -349,7 +345,7 @@ sensor:
   - platform: modbus_controller
     modbus_controller_id: skyline
     skip_updates: 10
-    name: "Battery Energy In Total"
+    name: "Bat Energy In Total"
     id: battery_energy_in_total
     register_type: holding
     address: 0x200D
@@ -367,7 +363,7 @@ sensor:
   - platform: modbus_controller
     modbus_controller_id: skyline
     skip_updates: 10
-    name: "Battery Energy Out Today"
+    name: "Bat Energy Out Today"
     id: battery_energy_out_today
     register_type: holding
     address: 0x200F
@@ -384,7 +380,7 @@ sensor:
   # Battery Energy Out Total
   - platform: modbus_controller
     modbus_controller_id: skyline
-    name: "Battery Energy Out Total"
+    name: "Bat Energy Out Total"
     skip_updates: 10
     id: battery_energy_out_total
     register_type: holding
@@ -401,7 +397,7 @@ sensor:
 
   - platform: modbus_controller
     modbus_controller_id: skyline
-    name: "MPPT1 Power Correct"
+    name: "MPPT1 Power"
     id: mppt1_power_correct
     register_type: holding
     address: 0x1012
@@ -419,7 +415,7 @@ sensor:
 
   - platform: modbus_controller
     modbus_controller_id: skyline
-    name: "MPPT2 Power Correct"
+    name: "MPPT2 Power"
     id: mppt2_power_correct
     register_type: holding
     address: 0x1016
@@ -454,14 +450,14 @@ sensor:
     device_class: energy
     accuracy_decimals: 1
     filters:
-      # Multiplication factor from W to kW is 0.001
-      - multiply: 0.001
+      - multiply: 0.001       # Multiplication factor from W to kW is 0.001
+
 
 
   # Inner Temperature (correct address)
   - platform: modbus_controller
     modbus_controller_id: skyline
-    name: "Inner Temperature"
+    name: "Inverter Temp"
     skip_updates: 5
     id: inner_temp
     register_type: holding
@@ -558,7 +554,7 @@ sensor:
   # Accumulated Load Energy
   - platform: modbus_controller
     modbus_controller_id: skyline
-    name: "Accumulated Load Energy"
+    name: "Accum Load Energy"
     id: accumulated_load_energy
     skip_updates: 10
     register_type: holding
@@ -626,7 +622,7 @@ sensor:
 
   - platform: modbus_controller
     modbus_controller_id: skyline
-    name: "Accumulated EPS Energy"
+    name: "Accum EPS Energy"
     id: accumulated_eps_energy
     skip_updates: 10
     register_type: holding
@@ -764,7 +760,7 @@ text_sensor:
   # EMS software version
   - platform: modbus_controller
     modbus_controller_id: skyline
-    name: "EMS Software Version"
+    name: "EMS SW Ver"
     entity_category: diagnostic
     id: ems_software_version
     skip_updates: 20
@@ -777,7 +773,7 @@ text_sensor:
   # DCDC software version
   - platform: modbus_controller
     modbus_controller_id: skyline
-    name: "DCDC Software Version"
+    name: "DCDC SW Ver"
     entity_category: diagnostic
     id: dcdc_software_version
     skip_updates: 20
@@ -815,7 +811,7 @@ text_sensor:
   # Slave firmware build date
   - platform: modbus_controller
     modbus_controller_id: skyline
-    name: "Slave Firmware Build Date"
+    name: "Slave FW Date"
     entity_category: diagnostic
     id: slave_firmware_build_date
     skip_updates: 20
@@ -828,7 +824,7 @@ text_sensor:
   # EMS Firmware build date
   - platform: modbus_controller
     modbus_controller_id: skyline
-    name: "EMS Firmware Build Date"
+    name: "EMS FW Date"
     entity_category: diagnostic
     id: ems_firmware_build_date
     skip_updates: 20
@@ -841,7 +837,7 @@ text_sensor:
   # DCDC firmware build date
   - platform: modbus_controller
     modbus_controller_id: skyline
-    name: "DCDC Firmware Build Date"
+    name: "DCDC FW Date"
     entity_category: diagnostic
     id: dcdc_firmware_build_date
     skip_updates: 20
@@ -873,7 +869,6 @@ binary_sensor:
         return false;
       }
 
-# Comprehensive parameter configuration from Modbus protocol
 number:
   # Time-based control parameters
   - platform: modbus_controller
@@ -944,18 +939,32 @@ number:
     skip_updates: 10
     register_type: holding
     address: 0x2112
-    min_value: 50
-    max_value: 1000
-    step: 10
+#    min_value: 50
+#    max_value: 1000
+#    step: 10
     unit_of_measurement: "Ah"
     device_class: power
     entity_category: config
 
 
+  - platform: modbus_controller
+    modbus_controller_id: skyline
+    name: "Grid Charge End SOC"
+    id: grid_charge_end_soc
+    skip_updates: 10
+    register_type: holding
+    address: 0x2117
+#    min_value: 10
+#    max_value: 100
+#    step: 1
+    unit_of_measurement: "%"
+    device_class: battery
+    entity_category: config
+
   # Grid and charger parameters
   - platform: modbus_controller
     modbus_controller_id: skyline
-    name: "Maximum Grid Charger Power"
+    name: "Max Grid Chrge Pwr"
     id: maximum_grid_charger_power
     skip_updates: 10
     register_type: holding
@@ -969,28 +978,28 @@ number:
 
   - platform: modbus_controller
     modbus_controller_id: skyline
-    name: "Grid Charge End SOC"
-    id: grid_charge_end_soc
-    skip_updates: 10
-    register_type: holding
-    address: 0x2117
-    min_value: 10
-    max_value: 100
-    step: 1
-    unit_of_measurement: "%"
-    device_class: battery
-    entity_category: config
-
-  - platform: modbus_controller
-    modbus_controller_id: skyline
     name: "Maximum Charger Power"
     id: maximum_charger_power
     skip_updates: 10
     register_type: holding
     address: 0x2118
-    min_value: 0
-    max_value: 6000
-    step: 50
+#    min_value: 0
+#    max_value: 6000
+#    step: 50
+    unit_of_measurement: "W"
+    device_class: power
+    entity_category: config
+
+  - platform: modbus_controller
+    modbus_controller_id: skyline
+    name: "Maximum Discharger Power"
+    id: maximum_discharger_power
+    skip_updates: 10
+    register_type: holding
+    address: 0x211A
+#    min_value: 0
+#    max_value: 6000
+#    step: 50
     unit_of_measurement: "W"
     device_class: power
     entity_category: config
@@ -1002,25 +1011,11 @@ number:
     skip_updates: 10
     register_type: holding
     address: 0x2119
-    min_value: 10
-    max_value: 100
-    step: 1
+#    min_value: 10
+#    max_value: 100
+#    step: 1
     unit_of_measurement: "%"
     device_class: battery
-    entity_category: config
-
-  - platform: modbus_controller
-    modbus_controller_id: skyline
-    name: "Maximum Discharger Power"
-    id: maximum_discharger_power
-    skip_updates: 10
-    register_type: holding
-    address: 0x211A
-    min_value: 0
-    max_value: 6000
-    step: 50
-    unit_of_measurement: "W"
-    device_class: power
     entity_category: config
 
   - platform: modbus_controller
@@ -1030,9 +1025,9 @@ number:
     skip_updates: 10
     register_type: holding
     address: 0x211B
-    min_value: 10
-    max_value: 90
-    step: 1
+#    min_value: 10
+#    max_value: 90
+#    step: 1
     unit_of_measurement: "%"
     device_class: battery
     entity_category: config
@@ -1040,15 +1035,15 @@ number:
 
   - platform: modbus_controller
     modbus_controller_id: skyline
-    name: "Maximum Feed In Grid Power"
+    name: "Max Feed-In Grid Pwr"
     id: maximum_feed_in_grid_power
     skip_updates: 10
     register_type: holding
     address: 0x30B9
     value_type: U_DWORD
-    min_value: 0
-    max_value: 10000
-    step: 100
+#    min_value: 0
+#    max_value: 10000
+#    step: 100
     unit_of_measurement: "W"
     device_class: power
     entity_category: config
@@ -1056,77 +1051,77 @@ number:
    # Battery Max SoC
   - platform: modbus_controller
     modbus_controller_id: skyline
-    name: "Battery Max SoC"
+    name: "Bat Max SoC"
     skip_updates: 10
     id: battery_max_soc
     register_type: holding
     address: 0x2119
-    min_value: 10
-    max_value: 100
-    step: 1
+#    min_value: 10
+#    max_value: 100
+#    step: 1
 
   # Grid Max Charge SoC
   - platform: modbus_controller
     modbus_controller_id: skyline
-    name: "Grid Max Charge SoC"
+    name: "Grid Max Chrg SoC"
     skip_updates: 10
     id: grid_max_charge_soc
     register_type: holding
     address: 0x2117
-    min_value: 10
-    max_value: 100
-    step: 1
+#    min_value: 10
+#    max_value: 100
+#    step: 1
 
   # Grid Max Charge Power
   - platform: modbus_controller
     modbus_controller_id: skyline
-    name: "Grid Max Charge Power"
+    name: "Grid Max Chrg Power"
     skip_updates: 10
     id: grid_max_charge_power
     register_type: holding
     address: 0x2116
-    min_value: 0
-    max_value: 6000
-    step: 50
+#    min_value: 0
+#    max_value: 6000
+#    step: 50
     unit_of_measurement: "W"
 
   # Battery Max Charge Power
   - platform: modbus_controller
     modbus_controller_id: skyline
-    name: "Battery Max Charge Power"
+    name: "Bat Max Chg PWR"
     skip_updates: 10
     id: battery_max_charge_power
     register_type: holding
     address: 0x2118
-    min_value: 0
-    max_value: 6000
-    step: 50
+#    min_value: 0
+#    max_value: 6000
+#    step: 50
     unit_of_measurement: "W"
 
   # Battery Max Power
   - platform: modbus_controller
     modbus_controller_id: skyline
-    name: "Battery Max Power"
+    name: "Bat Max Pwr"
     skip_updates: 10
     id: battery_max_power
     register_type: holding
     address: 0x211A
-    min_value: 0
-    max_value: 6000
-    step: 50
+#    min_value: 0
+#    max_value: 6000
+#    step: 50
     unit_of_measurement: "W"
 
   # Grid Max Feed In Power (0x30B0 range)
   - platform: modbus_controller
     modbus_controller_id: skyline
-    name: "Grid Max Feed In Power"
+    name: "Grid Max Feed-In"
     skip_updates: 10
     id: grid_max_feed_in_power
     register_type: holding
     address: 0x30BA
-    min_value: 0
-    max_value: 6000
-    step: 50
+#    min_value: 0
+#    max_value: 6000
+#    step: 50
     unit_of_measurement: "W"
 
 
