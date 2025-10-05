@@ -8,7 +8,7 @@ and my thanks to iPeel who created the above project.
 
 
 # Known issues
-* This is a work in progress, the data may not be correct!!!!!
+* This is a work in progress, but the basic info most people will need is available
 
 
 # Requirements
