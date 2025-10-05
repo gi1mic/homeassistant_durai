@@ -126,7 +126,7 @@ sensor:
     unit_of_measurement: "kWh"
     device_class: energy
     state_class: total_increasing
-    accuracy_decimals: 2
+    accuracy_decimals: 0
     value_type: U_DWORD
     filters:
       - multiply: 0.01
@@ -143,7 +143,7 @@ sensor:
     unit_of_measurement: "kWh"
     device_class: energy
     state_class: total_increasing
-    accuracy_decimals: 2
+    accuracy_decimals: 0
     value_type: U_DWORD
     filters:
       - multiply: 0.01
@@ -175,7 +175,7 @@ sensor:
     unit_of_measurement: "V"
     device_class: voltage
     state_class: measurement
-    accuracy_decimals: 1
+    accuracy_decimals: 0
     filters:
       - multiply: 0.1
 
@@ -208,7 +208,7 @@ sensor:
     unit_of_measurement: "kWh"
     device_class: energy
     state_class: total_increasing
-    accuracy_decimals: 2
+    accuracy_decimals: 0
     value_type: U_DWORD
     filters:
       - multiply: 0.01
@@ -226,7 +226,7 @@ sensor:
     unit_of_measurement: "kWh"
     device_class: energy
     state_class: total_increasing
-    accuracy_decimals: 2
+    accuracy_decimals: 0
     value_type: U_DWORD
     filters:
       - multiply: 0.01
@@ -257,7 +257,7 @@ sensor:
     unit_of_measurement: "kW"
     device_class: power
     state_class: measurement
-    accuracy_decimals: 2
+    accuracy_decimals: 0
     lambda: |-
       return id(eps_load_l1).state;  
 # Three phase inverter
@@ -336,7 +336,7 @@ sensor:
     unit_of_measurement: "kWh"
     device_class: energy
     state_class: total_increasing
-    accuracy_decimals: 2
+    accuracy_decimals: 0
     value_type: U_DWORD
     filters:
       - multiply: 0.01
@@ -354,7 +354,7 @@ sensor:
     unit_of_measurement: "kWh"
     device_class: energy
     state_class: total_increasing
-    accuracy_decimals: 2
+    accuracy_decimals: 0
     value_type: U_DWORD
     filters:
       - multiply: 0.01
@@ -372,7 +372,7 @@ sensor:
     unit_of_measurement: "kWh"
     device_class: energy
     state_class: total_increasing
-    accuracy_decimals: 2
+    accuracy_decimals: 0
     value_type: U_DWORD
     filters:
       - multiply: 0.01
@@ -390,7 +390,7 @@ sensor:
     unit_of_measurement: "kWh"
     device_class: energy
     state_class: total_increasing
-    accuracy_decimals: 2
+    accuracy_decimals: 0
     value_type: U_DWORD
     filters:
       - multiply: 0.01
@@ -545,7 +545,7 @@ sensor:
     unit_of_measurement: "W"
     device_class: power
     state_class: measurement
-    accuracy_decimals: 1
+    accuracy_decimals: 0
     filters:
       - multiply: 0.1
 
@@ -567,7 +567,7 @@ sensor:
     state_class: total_increasing
     accuracy_decimals: 0
     filters:
-      - multiply: 10
+      - multiply: 0.01
 
   # Today Load Energy
   - platform: modbus_controller
@@ -597,7 +597,7 @@ sensor:
     unit_of_measurement: "Hz"
     device_class: frequency
     state_class: measurement
-    accuracy_decimals: 2
+    accuracy_decimals: 1
     filters:
       - multiply: 0.01
 
@@ -716,7 +716,7 @@ text_sensor:
     address: 0x1A00
     register_count: 8
     response_size: 16
-    raw_encode: HEXBYTES
+    raw_encode: ANSI 
 
   # Device serial information (0x1A10 range)
   - platform: modbus_controller
@@ -729,7 +729,7 @@ text_sensor:
     address: 0x1A10
     register_count: 8
     response_size: 16
-    raw_encode: HEXBYTES
+    raw_encode: ANSI 
 
   # Master software version
   - platform: modbus_controller
@@ -742,7 +742,7 @@ text_sensor:
     address: 0x1A1C
     register_count: 3
     response_size: 6
-    raw_encode: HEXBYTES
+    raw_encode: ANSI 
 
   # Slave software version
   - platform: modbus_controller
@@ -755,7 +755,7 @@ text_sensor:
     address: 0x1A26
     register_count: 3
     response_size: 6
-    raw_encode: HEXBYTES
+    raw_encode: ANSI 
 
   # EMS software version
   - platform: modbus_controller
@@ -768,7 +768,7 @@ text_sensor:
     address: 0x1A60
     register_count: 3
     response_size: 6
-    raw_encode: HEXBYTES
+    raw_encode: ANSI 
 
   # DCDC software version
   - platform: modbus_controller
@@ -781,7 +781,7 @@ text_sensor:
     address: 0x1A6F
     register_count: 3
     response_size: 6
-    raw_encode: HEXBYTES
+    raw_encode: ANSI 
 
   # Additional Device Information from Protocol
   # Modbus Protocol Version
@@ -793,7 +793,7 @@ text_sensor:
     skip_updates: 20
     register_type: holding
     address: 0x1A18
-    raw_encode: HEXBYTES
+    raw_encode: HEXBYTES 
 
   # Master Software Build Date
   - platform: modbus_controller
@@ -806,7 +806,7 @@ text_sensor:
     address: 0x1A23
     register_count: 3
     response_size: 6
-    raw_encode: HEXBYTES
+    raw_encode: ANSI 
 
   # Slave firmware build date
   - platform: modbus_controller
@@ -819,7 +819,7 @@ text_sensor:
     address: 0x1A2D
     register_count: 3
     response_size: 6
-    raw_encode: HEXBYTES
+    raw_encode: ANSI
 
   # EMS Firmware build date
   - platform: modbus_controller
@@ -832,7 +832,7 @@ text_sensor:
     address: 0x1A67
     register_count: 7
     response_size: 14
-    raw_encode: HEXBYTES
+    raw_encode: ANSI
 
   # DCDC firmware build date
   - platform: modbus_controller
@@ -845,7 +845,7 @@ text_sensor:
     address: 0x1A76
     register_count: 3
     response_size: 6
-    raw_encode: HEXBYTES
+    raw_encode: ANSI
 
 # Binary sensors for grid status
 binary_sensor:
