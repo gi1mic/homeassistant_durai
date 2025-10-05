@@ -1,4 +1,4 @@
-# Homeassistant/ESPhome integration for Duracell Durai Solar Inverters
+# Homeassistant/ESPhome integration for Duracell/Senergy/CYD Skyline/Midnite AIO inverters
 
 ESPhome configuration for monitoring and control of Duracell/Senergy/CYD Skyline/Midnite AIO inverters in Home Assistant. 
 
