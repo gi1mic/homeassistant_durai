@@ -8,7 +8,8 @@ I thank iPeel who created the above project as I would never have got far withou
 
 
 # Known issues
-* This is a work in progress, but the basic info most people will need is available
+* This is a work in progress, but the basic info most people require need is available just be aware I am still tinkering with the sensor names
+* I have coded this for a single phase inverter
 
 
 # Requirements
