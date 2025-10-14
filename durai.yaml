@@ -7,7 +7,7 @@
 #
 # This project requires an ESP32 and a low cost RS232 to RS485 adapter
 # 
-# A Liligo LILYGO T-CAN485 or a Waveshare ESP32-S3-RS485-CAN should work but may need the UART pins changed
+# If using a Waveshare ESP32-S3-RS485-CAN module use the waveshare-esp32-s3-rs485.yaml file
 esphome:
   name: durai_inverter
   friendly_name: Durai_Inverter
@@ -83,7 +83,7 @@ sensor:
     name: "Uptime Sensor"
 
 
-  # System Temperature
+    # System Temperature
   - platform: modbus_controller
     modbus_controller_id: skyline
     name: "Inverter Temperature"
@@ -117,7 +117,7 @@ sensor:
   # Grid Energy In Total
   - platform: modbus_controller
     modbus_controller_id: skyline
-    name: "Grid Energy In Total"
+    name: "Total Grid Energy In"
     id: grid_energy_in_total
     register_type: holding
     address: 0x1306
@@ -134,7 +134,7 @@ sensor:
   # Grid Energy Out Total
   - platform: modbus_controller
     modbus_controller_id: skyline
-    name: "Grid Energy Out Total"
+    name: "Total Grid Energy Out"
     id: grid_energy_out_total
     register_type: holding
     address: 0x1308
@@ -266,7 +266,7 @@ sensor:
   # Battery Sensors (0x2000 range)
   - platform: modbus_controller
     modbus_controller_id: skyline
-    name: "State of Charge"
+    name: "Battery SoC"
     id: soc
     register_type: holding
     address: 0x2000
@@ -326,7 +326,7 @@ sensor:
   # Battery Energy In Today
   - platform: modbus_controller
     modbus_controller_id: skyline
-    name: "Bat Energy In Today"
+    name: "Bat In Today"
     skip_updates: 10
     id: battery_energy_in_today
     register_type: holding
@@ -345,7 +345,7 @@ sensor:
   - platform: modbus_controller
     modbus_controller_id: skyline
     skip_updates: 10
-    name: "Bat Energy In Total"
+    name: "Bat In Total"
     id: battery_energy_in_total
     register_type: holding
     address: 0x200D
@@ -363,7 +363,7 @@ sensor:
   - platform: modbus_controller
     modbus_controller_id: skyline
     skip_updates: 10
-    name: "Bat Energy Out Today"
+    name: "Bat Out Today"
     id: battery_energy_out_today
     register_type: holding
     address: 0x200F
@@ -380,7 +380,7 @@ sensor:
   # Battery Energy Out Total
   - platform: modbus_controller
     modbus_controller_id: skyline
-    name: "Bat Energy Out Total"
+    name: "Bat Out Total"
     skip_updates: 10
     id: battery_energy_out_total
     register_type: holding
@@ -468,16 +468,6 @@ sensor:
     accuracy_decimals: 0
     value_type: S_WORD
 
-  # Inverter Mode
-  - platform: modbus_controller
-    modbus_controller_id: skyline
-    name: "Inverter Mode"
-    skip_updates: 10
-    id: inverter_mode
-    register_type: holding
-    address: 0x101D
-    state_class: measurement
-    accuracy_decimals: 0
 
 
 
@@ -554,7 +544,7 @@ sensor:
   # Accumulated Load Energy
   - platform: modbus_controller
     modbus_controller_id: skyline
-    name: "Accum Load Energy"
+    name: "Total Accum Load Energy"
     id: accumulated_load_energy
     skip_updates: 10
     register_type: holding
@@ -605,11 +595,11 @@ sensor:
   # Daily and Accumulated EPS Energy
   - platform: modbus_controller
     modbus_controller_id: skyline
-    name: "Daily EPS Energy"
+    name: "Total Daily EPS"
     id: daily_eps_energy
     skip_updates: 10
     register_type: holding
-    address: 0x1360
+    address: 0x1360 # in 10Wh
     register_count: 2
     response_size: 4
     value_type: U_DWORD
@@ -622,11 +612,11 @@ sensor:
 
   - platform: modbus_controller
     modbus_controller_id: skyline
-    name: "Accum EPS Energy"
+    name: "Total EPS Energy"
     id: accumulated_eps_energy
     skip_updates: 10
     register_type: holding
-    address: 0x1362
+    address: 0x1362  # in 10Wh
     register_count: 2
     response_size: 4
     value_type: U_DWORD
@@ -705,6 +695,30 @@ sensor:
 
 
 text_sensor:
+
+  # Inverter Mode
+  - platform: modbus_controller
+    modbus_controller_id: skyline
+    name: "Inverter Mode"
+    skip_updates: 10
+    id: inverter_mode
+    register_type: holding
+    address: 0x101D
+    raw_encode: HEXBYTES
+    lambda: |-
+      uint16_t value = modbus_controller::word_from_hex_str(x, 0);
+      switch (value) {
+        case 0x00: return std::string("Initial mode");
+        case 0x01: return std::string("Standby mode");
+        case 0x03: return std::string("On Grid mode");
+        case 0x04: return std::string("OffGrid mode");
+        case 0x05: return std::string("Fault mode");
+        case 0x09: return std::string("Shutdown mode");
+        default: return std::string("Unknown");
+      }
+      return x;
+
+
   # Device model information (0x1A00 range)
   - platform: modbus_controller
     modbus_controller_id: skyline
@@ -1165,3 +1179,1490 @@ switch:
 status_led:
   pin:
     number: GPIO2
+
+
+  # Battery parameters
+  #- platform: modbus_controller
+  #  modbus_controller_id: skyline
+  #  name: "BMS Comm Address"
+  #  id: bms_comm_address
+  #  register_type: holding
+  #  address: 0x2111
+  #  min_value: 1
+  #  max_value: 255
+  #  step: 1
+  #  entity_category: config
+
+
+#  - platform: modbus_controller
+#    modbus_controller_id: skyline
+#    name: "Stop Discharge Voltage"
+#    id: stop_discharge_voltage
+#    register_type: holding
+#    address: 0x2113
+    #min_value: 420
+    #max_value: 540
+    #step: 1
+#    unit_of_measurement: "V"
+#    device_class: voltage
+#    entity_category: config
+
+#  - platform: modbus_controller
+#    modbus_controller_id: skyline
+#    name: "Stop Charge Voltage"
+#    id: stop_charge_voltage
+#    register_type: holding
+#    address: 0x2114
+#    min_value: 540
+#    max_value: 600
+#    step: 1
+#    unit_of_measurement: "V"
+#    device_class: voltage
+#    entity_category: config
+
+
+  # Off-grid parameters
+#  - platform: modbus_controller
+#    modbus_controller_id: skyline
+#    name: "Rated Output Voltage"
+#    id: rated_output_voltage
+#    skip_updates: 20
+#    register_type: holding
+#    address: 0x211D
+#    unit_of_measurement: "V"
+#    device_class: voltage
+#    entity_category: diagnostic
+
+#  - platform: modbus_controller
+#    modbus_controller_id: skyline
+#    name: "Rated Output Frequency"
+#    id: rated_output_frequency
+#    skip_updates: 20
+#    register_type: holding
+#    address: 0x211E
+#    unit_of_measurement: "Hz"
+#    device_class: frequency
+#    entity_category: diagnostic
+
+#  - platform: modbus_controller
+#    modbus_controller_id: skyline
+#    name: "Off-grid Start Battery Capacity"
+#    id: offgrid_start_battery_capacity
+#    register_type: holding
+#    address: 0x211F
+#    min_value: 10
+#    max_value: 100
+#    step: 1
+#    unit_of_measurement: "%"
+#    device_class: battery
+#    entity_category: config
+
+#  - platform: modbus_controller
+#    modbus_controller_id: skyline
+#    name: "Maximum Discharge Current"
+#    id: maximum_discharge_current
+#    register_type: holding
+#    address: 0x2120
+#    min_value: 1
+#    max_value: 200
+#    step: 1
+#    unit_of_measurement: "A"
+#    device_class: current
+#    entity_category: config
+#    filters:
+#      - multiply: 0.01
+
+#  - platform: modbus_controller
+#    modbus_controller_id: skyline
+#    name: "Maximum Charger Current"
+#    id: maximum_charger_current
+#    register_type: holding
+#    address: 0x2121
+#    min_value: 1
+#    max_value: 200
+#    step: 1
+#    unit_of_measurement: "A"
+#    device_class: current
+#    entity_category: config
+#    filters:
+#      - multiply: 0.01
+
+  # Date/Time parameters
+#  - platform: modbus_controller
+#    modbus_controller_id: skyline
+#    name: "Date Year"
+#    id: date_year
+#    register_type: holding
+#    address: 0x3000
+#    entity_category: config
+
+#  - platform: modbus_controller
+#    modbus_controller_id: skyline
+#    name: "Date Month"
+#    id: date_month
+#    register_type: holding
+#    address: 0x3001
+#    entity_category: config
+
+#  - platform: modbus_controller
+#    modbus_controller_id: skyline
+#    name: "Date Day"
+#    id: date_day
+#    register_type: holding
+#    address: 0x3001
+#    entity_category: config
+
+  # Modbus and digital meter parameters
+  #- platform: modbus_controller
+  #  modbus_controller_id: skyline
+  #  name: "Modbus Address"
+  #  id: modbus_address
+  #  register_type: holding
+  #  address: 0x303E
+  #  min_value: 1
+  #  max_value: 247
+  #  step: 1
+  #  entity_category: config
+
+ # - platform: modbus_controller
+ #   modbus_controller_id: skyline
+ #   name: "Digital Meter Modbus Address"
+ #   id: digital_meter_modbus_address
+ #   register_type: holding
+ #   address: 0x30B0
+ #   min_value: 1
+ #   max_value: 255
+ #   step: 1
+ #   entity_category: config
+
+
+  # Protection parameters
+  #- platform: modbus_controller
+  #  modbus_controller_id: skyline
+  #  name: "Soft Start Time"
+  #  id: soft_start_time
+  #  register_type: holding
+  #  address: 0x5000
+  #  min_value: 10
+  #  max_value: 600
+  #  step: 1
+  #  unit_of_measurement: "s"
+  #  entity_category: config
+
+ # - platform: modbus_controller
+ #   modbus_controller_id: skyline
+ #   name: "Reconnect Time"
+ #   id: reconnect_time
+ #   register_type: holding
+ #   address: 0x5001
+ #   min_value: 10
+ #   max_value: 900
+ #   step: 1
+ #   unit_of_measurement: "s"
+ #   entity_category: config
+
+  # Grid protection limits
+ # - platform: modbus_controller
+ #   modbus_controller_id: skyline
+ #   name: "Grid Frequency High Loss Level 1"
+ #   id: grid_freq_high_loss_level_1
+ #   register_type: holding
+ #   address: 0x5002
+ #   min_value: 5000
+ #   max_value: 6000
+ #   step: 1
+ #   unit_of_measurement: "Hz"
+ #   device_class: frequency
+ #   entity_category: config
+ #   filters:
+ #     - multiply: 0.01
+
+#  - platform: modbus_controller
+#    modbus_controller_id: skyline
+#    name: "Grid Frequency Low Loss Level 1"
+#    id: grid_freq_low_loss_level_1
+#    register_type: holding
+#    address: 0x5003
+#    min_value: 4000
+#    max_value: 5000
+#    step: 1
+#    unit_of_measurement: "Hz"
+#    device_class: frequency
+#    entity_category: config
+#    filters:
+#      - multiply: 0.01
+
+#  - platform: modbus_controller
+#    modbus_controller_id: skyline
+#    name: "Grid Voltage High Loss Level 1"
+#    id: grid_voltage_high_loss_level_1
+#    register_type: holding
+#    address: 0x5004
+#    min_value: 2200
+#    max_value: 3000
+#    step: 1
+#    unit_of_measurement: "V"
+#    device_class: voltage
+#    entity_category: config
+#    filters:
+#      - multiply: 0.1
+
+#  - platform: modbus_controller
+#    modbus_controller_id: skyline
+#    name: "Grid Voltage Low Loss Level 1"
+#    id: grid_voltage_low_loss_level_1
+#    register_type: holding
+#    address: 0x5005
+#    min_value: 700
+#    max_value: 2200
+#    step: 1
+#    unit_of_measurement: "V"
+#    device_class: voltage
+#    entity_category: config
+#    filters:
+#      - multiply: 0.1
+
+# Additional protection parameters
+#  - platform: modbus_controller
+#    modbus_controller_id: skyline
+#    name: "Derating Watt Percent"
+#    id: derating_watt_percent
+#    register_type: holding
+#    address: 0x5104
+#    min_value: 10
+#    max_value: 100
+#    step: 1
+#    unit_of_measurement: "%"
+#    entity_category: config
+
+#  - platform: modbus_controller
+#    modbus_controller_id: skyline
+#    name: "Unbalance Voltage Limit"
+#    id: unbalance_voltage_limit
+#    register_type: holding
+#    address: 0x510F
+#    min_value: 1
+#    max_value: 20
+#    step: 1
+#    unit_of_measurement: "%"
+#    entity_category: config
+
+#  - platform: modbus_controller
+#    modbus_controller_id: skyline
+#    name: "Ground Current Limit"
+#    id: ground_current_limit
+#    register_type: holding
+#    address: 0x5110
+#    min_value: 10
+#    max_value: 300
+#    step: 1
+#    unit_of_measurement: "mA"
+#    entity_category: config
+
+#  - platform: modbus_controller
+#    modbus_controller_id: skyline
+#    name: "Reactive Power Percent"
+#    id: reactive_power_percent
+#    register_type: holding
+#    address: 0x5114
+#    min_value: -60
+#    max_value: 60
+#    step: 1
+#    unit_of_measurement: "%"
+#    entity_category: config
+#    value_type: S_WORD
+
+
+
+#  - platform: modbus_controller
+#    modbus_controller_id: skyline
+#    name: "Once/Everyday"
+#    id: once_everyday
+#    address: 0x2101
+#    entity_category: config
+#    optionsmap:
+#      "Once": 0
+#      "Everyday": 1
+
+#  - platform: modbus_controller
+#    modbus_controller_id: skyline
+#    name: "Battery Type Selection"
+#    id: battery_type_selection
+#    address: 0x2110
+#    entity_category: config
+#    optionsmap:
+#      "Unavailable": 0
+#      "Lead-Acid battery": 1
+#      "PYLON Lithium-ion": 2
+#      "Dyness Lithium-ion": 3
+#      "Aobo Lithium-ion": 4
+#      "UZ Lithium-ion": 5
+#      "VestMoods Lithium-ion": 6
+#      "XinYi Lithium-ion": 7
+
+#  - platform: modbus_controller
+#    modbus_controller_id: skyline
+#    name: "Digital Meter Type"
+#    id: digital_meter_type
+#    address: 0x30B1
+#    entity_category: config
+#    optionsmap:
+#      "Unknown": 0
+#      "Gavazzi/EM340DINAV23XS1X": 1
+#      "CHINT/DTSU666": 2
+#      "Acrel/DTSF1352-C": 3
+#      "Lovato/DMG210": 4
+#      "G2000": 5
+#      "Gavazzi/ET112": 6
+#      "KSEM": 7
+#      "CHINT/DDSU666": 8
+
+#  - platform: modbus_controller
+#    modbus_controller_id: skyline
+#    name: "Digital Meter Power Direction"
+#    id: digital_meter_power_direction
+#    address: 0x30B2
+#    entity_category: config
+#    optionsmap:
+#      "Positive": 0
+#      "Negative": 1
+
+#  - platform: modbus_controller
+#    modbus_controller_id: skyline
+#    name: "Power Limit Function"
+#    id: power_limit_function
+#    address: 0x30B3
+#    entity_category: config
+#    optionsmap:
+#      "Disable": 0
+#      "Power limit by external device(G2000)": 1
+#      "Power limit by PVI external CT sensor": 2
+#      "Power limit by digital meter device": 3
+
+#  - platform: modbus_controller
+#    modbus_controller_id: skyline
+#    name: "Power Limit CT Ratio"
+#    id: power_limit_ct_ratio
+#    address: 0x30B4
+#    entity_category: config
+#    optionsmap:
+#      "Unknown": 0
+#      "1000:1": 1
+#      "2000:1": 2
+#      "2500:1": 3
+#      "3000:1": 4
+#      "4000:1": 5
+#      "5000:1": 6
+#      "6000:1": 7
+#      "10000:1": 8
+
+#  - platform: modbus_controller
+#    modbus_controller_id: skyline
+#    name: "Power Limit Mode"
+#    id: power_limit_mode
+#    address: 0x30B5
+#    entity_category: config
+#    optionsmap:
+#      "CT on Grid (Meter on Grid)": 0
+#      "CT on Load (Meter on Load)": 1
+
+#  - platform: modbus_controller
+#    modbus_controller_id: skyline
+#    name: "Regulation Code"
+#    id: regulation_code
+#    address: 0x5101
+#    entity_category: config
+#    optionsmap:
+#      "AU (Australia AS/NZS 4777.2/.3)": 1
+#      "DE (Germany VDE 0126-1-1/A1)": 2
+#      "TW (Taiwan TW GRID)": 3
+#      "DE (Germany VDE-AR-N 4105)": 4
+#      "JP (Japan JETGR0002-1-2.0)": 5
+#      "IT (Italy CEI 0-21)": 6
+#      "SE (Sweden SWEDEN Grid)": 7
+#      "UK (British G98)": 8
+#      "UL (USA UL)": 9
+#      "TL (Thailand PEA)": 10
+#      "SE (Sweden SWEDEN GRID) 2007": 11
+#      "NL (Netherlands EN50549-1 2019)": 12
+#      "TL (Thailand MEA)": 13
+#      "CN (China NB/T 32004)": 14
+#      "IND（India IEC61727）": 15
+
+
+#  - platform: modbus_controller
+#    modbus_controller_id: skyline
+#    name: "Islanding Detection"
+#    id: islanding_detection
+#    register_type: holding
+#    address: 0x510E
+#    entity_category: config
+
+#  - platform: modbus_controller
+#    modbus_controller_id: skyline
+#    name: "PV String Detection"
+#    id: pv_string_detection
+#    register_type: holding
+#    address: 0x5111
+#    entity_category: config
+
+#  - platform: modbus_controller
+#    modbus_controller_id: skyline
+#    name: "Low Voltage Through Detection"
+#    id: low_voltage_through_detection
+#    register_type: holding
+#    address: 0x5112
+#    entity_category: config
+
+#  - platform: modbus_controller
+#    modbus_controller_id: skyline
+#    name: "Adjust Resistance"
+#    id: adjust_resistance
+#    register_type: holding
+#    address: 0x5115
+#    entity_category: config
+
+#  - platform: modbus_controller
+#    modbus_controller_id: skyline
+#    name: "Insulation Resistor Detection"
+#    id: insulation_resistor_detection
+#    register_type: holding
+#    address: 0x5117
+#    entity_category: config
+
+#  - platform: modbus_controller
+#    modbus_controller_id: skyline
+#    name: "Ground Current Detection"
+#    id: ground_current_detection
+#    register_type: holding
+#    address: 0x5118
+#    entity_category: config
+
+#  - platform: modbus_controller
+#    modbus_controller_id: skyline
+#    name: "Inverter Control"
+#    id: inverter_control
+#    register_type: holding
+#    address: 0x6001
+#    entity_category: config
+
+
+
+
+  # PV Energy Today
+#  - platform: modbus_controller
+#    modbus_controller_id: skyline
+#    name: "PV Energy Today"
+#    id: pv_energy_today
+#    register_type: holding
+#    address: 0x1025
+#    register_count: 2
+#    response_size: 4
+#    unit_of_measurement: "kWh"
+#    device_class: energy
+#    state_class: total_increasing
+#    accuracy_decimals: 2
+#    value_type: U_DWORD
+#    filters:
+#      - multiply: 0.001
+
+  # PV Energy Total
+#  - platform: modbus_controller
+#    modbus_controller_id: skyline
+#    name: "PV Energy Total"
+#    id: pv_energy_total
+#    register_type: holding
+#    address: 0x101F
+#    register_count: 2
+#    response_size: 4
+#    unit_of_measurement: "kWh"
+#    device_class: energy
+#    state_class: total_increasing
+#    accuracy_decimals: 0
+#    value_type: U_DWORD
+
+
+#  - platform: modbus_controller
+#    modbus_controller_id: skyline
+#    name: "EPS Load L2"
+#    id: eps_load_l2
+#    register_type: holding
+#    address: 0x1359
+#    register_count: 2
+#    response_size: 4
+#    unit_of_measurement: "kW"
+#    device_class: power
+#    state_class: measurement
+#    accuracy_decimals: 2
+#    value_type: S_DWORD
+#    filters:
+#      - multiply: 0.0001
+
+#  - platform: modbus_controller
+#    modbus_controller_id: skyline
+#    name: "EPS Load L3"
+#    id: eps_load_l3
+#    register_type: holding
+#    address: 0x135E
+#    register_count: 2
+#    response_size: 4
+#    unit_of_measurement: "kW"
+#    device_class: power
+#    state_class: measurement
+#    accuracy_decimals: 2
+#    value_type: S_DWORD
+#    filters:
+#      - multiply: 0.0001
+
+
+
+  # Battery Temperature (currently returns zero)
+#  - platform: modbus_controller
+#    modbus_controller_id: skyline
+#    name: "Battery Temperature"
+#    id: battery_temp
+#    register_type: holding
+#    address: 0x2001
+#    unit_of_measurement: "°C"
+#    device_class: temperature
+#    state_class: measurement
+#    accuracy_decimals: 0
+#    value_type: S_WORD
+
+
+  # Reactive Power
+#  - platform: modbus_controller
+#    modbus_controller_id: skyline
+#    name: "Reactive Power"
+#    id: reactive_power
+#    register_type: holding
+#    address: 0x1039
+#    register_count: 2
+#    response_size: 4
+#    value_type: S_DWORD
+#    unit_of_measurement: "VAR"
+#    state_class: measurement
+#    accuracy_decimals: 1
+#    filters:
+#      - multiply: 0.1
+
+  # Power Factor
+#  - platform: modbus_controller
+#    modbus_controller_id: skyline
+#    name: "Power Factor"
+#    id: power_factor
+#    register_type: holding
+#    address: 0x103D
+#    value_type: S_WORD
+#    state_class: measurement
+#    accuracy_decimals: 3
+#    filters:
+#      - multiply: 0.001
+
+  # PV4 sensors (if applicable)
+#  - platform: modbus_controller
+#    modbus_controller_id: skyline
+#    name: "PV4 Voltage"
+#    id: pv4_voltage
+#    register_type: holding
+#    address: 0x103E
+#    unit_of_measurement: "V"
+#    device_class: voltage
+#    state_class: measurement
+#    accuracy_decimals: 1
+#    filters:
+#      - multiply: 0.1
+
+#  - platform: modbus_controller
+#    modbus_controller_id: skyline
+#    name: "PV4 Current"
+#    id: pv4_current
+#    register_type: holding
+#    address: 0x103F
+#    unit_of_measurement: "A"
+#    device_class: current
+#    state_class: measurement
+#    accuracy_decimals: 2
+#    filters:
+#      - multiply: 0.01
+
+#  - platform: modbus_controller
+#    modbus_controller_id: skyline
+#    name: "MPPT4 Power"
+#    id: mppt4_power
+#    register_type: holding
+#    address: 0x1040
+#    register_count: 2
+#    response_size: 4
+#    value_type: U_DWORD
+#    unit_of_measurement: "W"
+#    device_class: power
+#    state_class: measurement
+#    accuracy_decimals: 1
+#    filters:
+#      - multiply: 0.1
+
+  # Additional Grid sensors with correct addresses
+#  - platform: modbus_controller
+#    modbus_controller_id: skyline
+#    name: "Phase R Grid Power"
+#    id: phase_r_grid_power
+#    register_type: holding
+#    address: 0x1300
+#    register_count: 2
+#    response_size: 4
+#    value_type: S_DWORD
+#    unit_of_measurement: "W"
+#    device_class: power
+#    state_class: measurement
+#    accuracy_decimals: 1
+#    filters:
+#      - multiply: 0.1
+
+#  - platform: modbus_controller
+#    modbus_controller_id: skyline
+#    name: "Phase S Grid Power"
+#    id: phase_s_grid_power
+#    register_type: holding
+#    address: 0x1302
+#    register_count: 2
+#    response_size: 4
+#    value_type: S_DWORD
+#    unit_of_measurement: "W"
+#    device_class: power
+#    state_class: measurement
+#    accuracy_decimals: 1
+#    filters:
+#      - multiply: 0.1
+
+#  - platform: modbus_controller
+#    modbus_controller_id: skyline
+#    name: "Phase T Grid Power"
+#    id: phase_t_grid_power
+#    register_type: holding
+#    address: 0x1304
+#    register_count: 2
+#    response_size: 4
+#    value_type: S_DWORD
+#    unit_of_measurement: "W"
+#    device_class: power
+#    state_class: measurement
+#    accuracy_decimals: 1
+#    filters:
+#      - multiply: 0.1
+
+  # Load sensors
+#  - platform: modbus_controller
+#    modbus_controller_id: skyline
+#    name: "Phase R Load Power"
+#    id: phase_r_load_power
+#    register_type: holding
+#    address: 0x130A
+#    register_count: 2
+#    response_size: 4
+#    value_type: S_DWORD
+#    unit_of_measurement: "W"
+#    device_class: power
+#    state_class: measurement
+#    accuracy_decimals: 1
+#    filters:
+#      - multiply: 0.1
+
+#  - platform: modbus_controller
+#    modbus_controller_id: skyline
+#    name: "Phase S Load Power"
+#    id: phase_s_load_power
+#    register_type: holding
+#    address: 0x130C
+#    register_count: 2
+#    response_size: 4
+#    value_type: S_DWORD
+#    unit_of_measurement: "W"
+#    device_class: power
+#    state_class: measurement
+#    accuracy_decimals: 1
+#    filters:
+#      - multiply: 0.1
+
+#  - platform: modbus_controller
+#    modbus_controller_id: skyline
+#    name: "Phase T Load Power"
+#    id: phase_t_load_power
+#    register_type: holding
+#    address: 0x130E
+#    register_count: 2
+#    response_size: 4
+#    value_type: S_DWORD
+#    unit_of_measurement: "W"
+#    device_class: power
+#    state_class: measurement
+#    accuracy_decimals: 1
+#    filters:
+#      - multiply: 0.1
+
+
+  # Missing Real-time Data Sensors from Protocol
+  # Phase A/B/C Voltage (0x1001, 0x1006, 0x100B)
+#  - platform: modbus_controller
+#    modbus_controller_id: skyline
+#    name: "Phase A Voltage"
+#    id: phase_a_voltage
+#    register_type: holding
+#    address: 0x1001
+#    unit_of_measurement: "V"
+#    device_class: voltage
+#    state_class: measurement
+#    accuracy_decimals: 1
+#    filters:
+#      - multiply: 0.1
+
+#  - platform: modbus_controller
+#    modbus_controller_id: skyline
+#    name: "Phase A Current"
+#    id: phase_a_current
+#    register_type: holding
+#    address: 0x1002
+#    unit_of_measurement: "A"
+#    device_class: current
+#    state_class: measurement
+#    accuracy_decimals: 2
+#    filters:
+#      - multiply: 0.01
+
+#  - platform: modbus_controller
+#    modbus_controller_id: skyline
+#    name: "Phase A Power"
+#    id: phase_a_power
+#    register_type: holding
+#    address: 0x1003
+#    register_count: 2
+#    response_size: 4
+#    value_type: S_DWORD
+#    unit_of_measurement: "W"
+#    device_class: power
+#    state_class: measurement
+#    accuracy_decimals: 1
+#    filters:
+#      - multiply: 0.1
+
+#  - platform: modbus_controller
+#    modbus_controller_id: skyline
+#    name: "Phase A Frequency"
+#    id: phase_a_frequency
+#    register_type: holding
+#    address: 0x1005
+#    unit_of_measurement: "Hz"
+#    device_class: frequency
+#    state_class: measurement
+#    accuracy_decimals: 2
+#    filters:
+#      - multiply: 0.01
+
+#  - platform: modbus_controller
+#    modbus_controller_id: skyline
+#    name: "Phase B Voltage"
+#    id: phase_b_voltage
+#    register_type: holding
+#    address: 0x1006
+#    unit_of_measurement: "V"
+#    device_class: voltage
+#    state_class: measurement
+#    accuracy_decimals: 1
+#    filters:
+#      - multiply: 0.1
+
+#  - platform: modbus_controller
+#    modbus_controller_id: skyline
+#    name: "Phase B Current"
+#    id: phase_b_current
+#    register_type: holding
+#    address: 0x1007
+#    unit_of_measurement: "A"
+#    device_class: current
+#    state_class: measurement
+#    accuracy_decimals: 2
+#    filters:
+#      - multiply: 0.01
+
+#  - platform: modbus_controller
+#    modbus_controller_id: skyline
+#    name: "Phase B Power"
+#    id: phase_b_power
+#    register_type: holding
+#    address: 0x1008
+#    register_count: 2
+#    response_size: 4
+#    value_type: S_DWORD
+#    unit_of_measurement: "W"
+#    device_class: power
+#    state_class: measurement
+#    accuracy_decimals: 1
+#    filters:
+#      - multiply: 0.1
+
+#  - platform: modbus_controller
+#    modbus_controller_id: skyline
+#    name: "Phase B Frequency"
+#    id: phase_b_frequency
+#    register_type: holding
+#    address: 0x100A
+#    unit_of_measurement: "Hz"
+#    device_class: frequency
+#    state_class: measurement
+#    accuracy_decimals: 2
+#    filters:
+#      - multiply: 0.01
+
+#  - platform: modbus_controller
+#    modbus_controller_id: skyline
+#    name: "Phase C Voltage"
+#    id: phase_c_voltage
+#    register_type: holding
+#    address: 0x100B
+#    unit_of_measurement: "V"
+#    device_class: voltage
+#    state_class: measurement
+#    accuracy_decimals: 1
+#    filters:
+#      - multiply: 0.1
+
+#  - platform: modbus_controller
+#    modbus_controller_id: skyline
+#    name: "Phase C Current"
+#    id: phase_c_current
+#    register_type: holding
+#    address: 0x100C
+#    unit_of_measurement: "A"
+#    device_class: current
+#    state_class: measurement
+#    accuracy_decimals: 2
+#    filters:
+#      - multiply: 0.01
+
+#  - platform: modbus_controller
+#    modbus_controller_id: skyline
+#    name: "Phase C Power"
+#    id: phase_c_power
+#    register_type: holding
+#    address: 0x100D
+#    register_count: 2
+#    response_size: 4
+#    value_type: S_DWORD
+#    unit_of_measurement: "W"
+#    device_class: power
+#    state_class: measurement
+#    accuracy_decimals: 1
+#    filters:
+#      - multiply: 0.1
+
+#  - platform: modbus_controller
+#    modbus_controller_id: skyline
+#    name: "Phase C Frequency"
+#    id: phase_c_frequency
+#    register_type: holding
+#    address: 0x100F
+#    unit_of_measurement: "Hz"
+#    device_class: frequency
+#    state_class: measurement
+#    accuracy_decimals: 2
+#    filters:
+#      - multiply: 0.01
+
+  # Correct PV/MPPT sensors (updating existing ones with proper addresses)
+  # PV1 = 0x1010, PV2 = 0x1014, PV3 = 0x1018, PV4 = 0x103E
+#  - platform: modbus_controller
+#    modbus_controller_id: skyline
+#    name: "PV1 Voltage"
+#    id: pv1_voltage_correct
+#    register_type: holding
+#    address: 0x1010
+#    unit_of_measurement: "V"
+#    device_class: voltage
+#    state_class: measurement
+#    accuracy_decimals: 1
+#    filters:
+#      - multiply: 0.1
+
+#  - platform: modbus_controller
+#    modbus_controller_id: skyline
+#    name: "PV1 Current"
+#    id: pv1_current_correct
+#    register_type: holding
+#    address: 0x1011
+#    unit_of_measurement: "A"
+#    device_class: current
+#    state_class: measurement
+#    accuracy_decimals: 2
+#    filters:
+#      - multiply: 0.01
+
+
+
+#  - platform: modbus_controller
+#    modbus_controller_id: skyline
+#    name: "PV2 Voltage"
+#    id: pv2_voltage_correct
+#    register_type: holding
+#    address: 0x1014
+#    unit_of_measurement: "V"
+#    device_class: voltage
+#    state_class: measurement
+#    accuracy_decimals: 1
+#    filters:
+#      - multiply: 0.1
+
+#  - platform: modbus_controller
+#    modbus_controller_id: skyline
+#    name: "PV2 Current"
+#    id: pv2_current_correct
+#    register_type: holding
+#    address: 0x1015
+#    unit_of_measurement: "A"
+#    device_class: current
+#    state_class: measurement
+#    accuracy_decimals: 2
+#    filters:
+#      - multiply: 0.01
+
+
+#  - platform: modbus_controller
+#    modbus_controller_id: skyline
+#    name: "PV3 Voltage"
+#    id: pv3_voltage
+#    register_type: holding
+#    address: 0x1018
+#    unit_of_measurement: "V"
+#    device_class: voltage
+#    state_class: measurement
+#    accuracy_decimals: 1
+#    filters:
+#      - multiply: 0.1
+
+#  - platform: modbus_controller
+#    modbus_controller_id: skyline
+#    name: "PV3 Current"
+#    id: pv3_current
+#    register_type: holding
+#    address: 0x1019
+#    unit_of_measurement: "A"
+#    device_class: current
+#    state_class: measurement
+#    accuracy_decimals: 2
+#    filters:
+#      - multiply: 0.01
+
+#  - platform: modbus_controller
+#    modbus_controller_id: skyline
+#    name: "MPPT3 Power"
+#    id: mppt3_power
+#    register_type: holding
+#    address: 0x101A
+#    register_count: 2
+#    response_size: 4
+#    value_type: U_DWORD
+#    unit_of_measurement: "W"
+#    device_class: power
+#    state_class: measurement
+#    accuracy_decimals: 1
+#    filters:
+#      - multiply: 0.1
+
+
+
+  # Error Code
+ # - platform: modbus_controller
+ #   modbus_controller_id: skyline
+ #   name: "Error Code"
+ #   id: error_code
+ #   register_type: holding
+ #   address: 0x101E
+ #   register_count: 2
+ #   response_size: 4
+ #   value_type: U_DWORD
+ #   state_class: measurement
+ #   accuracy_decimals: 0
+
+
+
+  # Additional Grid voltages and currents
+#  - platform: modbus_controller
+#    modbus_controller_id: skyline
+#    name: "L1-N Grid Voltage"
+#    id: l1_n_grid_voltage
+#    register_type: holding
+#    address: 0x131A
+#    unit_of_measurement: "V"
+#    device_class: voltage
+#    state_class: measurement
+#    accuracy_decimals: 1
+#    filters:
+#      - multiply: 0.1
+
+#  - platform: modbus_controller
+#    modbus_controller_id: skyline
+#    name: "L2-N Grid Voltage"
+#    id: l2_n_grid_voltage
+#    register_type: holding
+#    address: 0x131B
+#    unit_of_measurement: "V"
+#    device_class: voltage
+#    state_class: measurement
+#    accuracy_decimals: 1
+#    filters:
+#      - multiply: 0.1
+
+#  - platform: modbus_controller
+#    modbus_controller_id: skyline
+#    name: "L3-N Grid Voltage"
+#    id: l3_n_grid_voltage
+#    register_type: holding
+#    address: 0x131C
+#    unit_of_measurement: "V"
+#    device_class: voltage
+#    state_class: measurement
+#    accuracy_decimals: 1
+#    filters:
+#      - multiply: 0.1
+
+  # Grid currents (L1, L2, L3)
+#  - platform: modbus_controller
+#    modbus_controller_id: skyline
+#    name: "L1 Grid Current"
+#    id: l1_grid_current
+#    register_type: holding
+#    address: 0x131D
+#    register_count: 2
+#    response_size: 4
+#    value_type: S_DWORD
+#    unit_of_measurement: "A"
+#    device_class: current
+#    state_class: measurement
+#    accuracy_decimals: 2
+#    filters:
+#      - multiply: 0.01
+
+#  - platform: modbus_controller
+#    modbus_controller_id: skyline
+#    name: "L2 Grid Current"
+#    id: l2_grid_current
+#    register_type: holding
+#    address: 0x131F
+#    register_count: 2
+#    response_size: 4
+#    value_type: S_DWORD
+#    unit_of_measurement: "A"
+#    device_class: current
+#    state_class: measurement
+#    accuracy_decimals: 2
+#    filters:
+#      - multiply: 0.01
+
+#  - platform: modbus_controller
+#    modbus_controller_id: skyline
+#    name: "L3 Grid Current"
+#    id: l3_grid_current
+#    register_type: holding
+#    address: 0x1321
+#    register_count: 2
+#    response_size: 4
+#    value_type: S_DWORD
+#    unit_of_measurement: "A"
+#    device_class: current
+#    state_class: measurement
+#    accuracy_decimals: 2
+#    filters:
+#      - multiply: 0.01
+
+  # Load voltages (L1-N, L2-N, L3-N)
+#  - platform: modbus_controller
+#    modbus_controller_id: skyline
+#    name: "L1-N Load Voltage"
+#    id: l1_n_load_voltage
+#    register_type: holding
+#    address: 0x1323
+#    unit_of_measurement: "V"
+#    device_class: voltage
+#    state_class: measurement
+#    accuracy_decimals: 1
+#    filters:
+#      - multiply: 0.1
+
+#  - platform: modbus_controller
+#    modbus_controller_id: skyline
+#    name: "L2-N Load Voltage"
+#    id: l2_n_load_voltage
+#    register_type: holding
+#    address: 0x1324
+#    unit_of_measurement: "V"
+#    device_class: voltage
+#    state_class: measurement
+#    accuracy_decimals: 1
+#    filters:
+#      - multiply: 0.1
+
+#  - platform: modbus_controller
+#    modbus_controller_id: skyline
+#    name: "L3-N Load Voltage"
+#    id: l3_n_load_voltage
+#    register_type: holding
+#    address: 0x1325
+#    unit_of_measurement: "V"
+#    device_class: voltage
+#    state_class: measurement
+#    accuracy_decimals: 1
+#    filters:
+#      - multiply: 0.1
+
+  # Load currents (L1, L2, L3)
+#  - platform: modbus_controller
+#    modbus_controller_id: skyline
+#    name: "L1 Load Current"
+#    id: l1_load_current
+#    register_type: holding
+#    address: 0x1326
+#    register_count: 2
+#    response_size: 4
+#    value_type: S_DWORD
+#    unit_of_measurement: "A"
+#    device_class: current
+#    state_class: measurement
+#    accuracy_decimals: 2
+#    filters:
+#      - multiply: 0.01
+
+#  - platform: modbus_controller
+#    modbus_controller_id: skyline
+#    name: "L2 Load Current"
+#    id: l2_load_current
+#    register_type: holding
+#    address: 0x1328
+#    register_count: 2
+#    response_size: 4
+#    value_type: S_DWORD
+#    unit_of_measurement: "A"
+#    device_class: current
+#    state_class: measurement
+#    accuracy_decimals: 2
+#    filters:
+#      - multiply: 0.01
+
+#  - platform: modbus_controller
+#    modbus_controller_id: skyline
+#    name: "L3 Load Current"
+#    id: l3_load_current
+#    register_type: holding
+#    address: 0x132A
+#    register_count: 2
+#    response_size: 4
+#    value_type: S_DWORD
+#    unit_of_measurement: "A"
+#    device_class: current
+#    state_class: measurement
+#    accuracy_decimals: 2
+#    filters:
+#      - multiply: 0.01
+
+
+  # Additional EPS sensors
+#  - platform: modbus_controller
+#    modbus_controller_id: skyline
+#    name: "Phase R EPS Voltage"
+#    id: phase_r_eps_voltage
+#    register_type: holding
+#    address: 0x1350
+#    unit_of_measurement: "V"
+#    device_class: voltage
+#    state_class: measurement
+#    accuracy_decimals: 1
+#    filters:
+#      - multiply: 0.1
+
+#  - platform: modbus_controller
+#    modbus_controller_id: skyline
+#    name: "Phase R EPS Current"
+#    id: phase_r_eps_current
+#    register_type: holding
+#    address: 0x1351
+#    register_count: 2
+#    response_size: 4
+#    value_type: S_DWORD
+#    unit_of_measurement: "A"
+#    device_class: current
+#    state_class: measurement
+#    accuracy_decimals: 2
+#    filters:
+#      - multiply: 0.01
+
+#  - platform: modbus_controller
+#    modbus_controller_id: skyline
+#    name: "Phase R EPS Power"
+#    id: phase_r_eps_power
+#    register_type: holding
+#    address: 0x1353
+#    register_count: 2
+#    response_size: 4
+#    value_type: S_DWORD
+#    unit_of_measurement: "W"
+#    device_class: power
+#    state_class: measurement
+#    accuracy_decimals: 1
+#    filters:
+#      - multiply: 0.1
+
+#  - platform: modbus_controller
+#    modbus_controller_id: skyline
+#    name: "EPS Frequency"
+#    id: eps_frequency
+#    register_type: holding
+#    address: 0x1355
+#    unit_of_measurement: "Hz"
+#    device_class: frequency
+#    state_class: measurement
+#    accuracy_decimals: 2
+#    filters:
+#      - multiply: 0.01
+
+#  - platform: modbus_controller
+#    modbus_controller_id: skyline
+#    name: "Phase S EPS Voltage"
+#    id: phase_s_eps_voltage
+#    register_type: holding
+#    address: 0x1356
+#    unit_of_measurement: "V"
+#    device_class: voltage
+#    state_class: measurement
+#    accuracy_decimals: 1
+#    filters:
+#      - multiply: 0.1
+
+#  - platform: modbus_controller
+#    modbus_controller_id: skyline
+#    name: "Phase S EPS Current"
+#    id: phase_s_eps_current
+#    register_type: holding
+#    address: 0x1357
+#    register_count: 2
+#    response_size: 4
+#    value_type: S_DWORD
+#    unit_of_measurement: "A"
+#    device_class: current
+#    state_class: measurement
+#    accuracy_decimals: 2
+#    filters:
+#      - multiply: 0.01
+
+#  - platform: modbus_controller
+#    modbus_controller_id: skyline
+#    name: "Phase S EPS Power"
+#    id: phase_s_eps_power
+#    register_type: holding
+#    address: 0x1359
+#    register_count: 2
+#    response_size: 4
+#    value_type: S_DWORD
+#    unit_of_measurement: "W"
+#    device_class: power
+#    state_class: measurement
+#    accuracy_decimals: 1
+#    filters:
+#      - multiply: 0.1
+
+#  - platform: modbus_controller
+#    modbus_controller_id: skyline
+#    name: "Phase T EPS Voltage"
+#    id: phase_t_eps_voltage
+#    register_type: holding
+#    address: 0x135B
+#    unit_of_measurement: "V"
+#    device_class: voltage
+#    state_class: measurement
+#    accuracy_decimals: 1
+#    filters:
+#      - multiply: 0.1
+
+#  - platform: modbus_controller
+#    modbus_controller_id: skyline
+#    name: "Phase T EPS Current"
+#    id: phase_t_eps_current
+#    register_type: holding
+#    address: 0x135C
+#    register_count: 2
+#    response_size: 4
+#    value_type: S_DWORD
+#    unit_of_measurement: "A"
+#    device_class: current
+#    state_class: measurement
+#    accuracy_decimals: 2
+#    filters:
+#      - multiply: 0.01
+
+#  - platform: modbus_controller
+#    modbus_controller_id: skyline
+#    name: "Phase T EPS Power"
+#    id: phase_t_eps_power
+#    register_type: holding
+#    address: 0x135E
+#    register_count: 2
+#    response_size: 4
+#    value_type: S_DWORD
+#    unit_of_measurement: "W"
+#    device_class: power
+#    state_class: measurement
+#    accuracy_decimals: 1
+#    filters:
+#      - multiply: 0.1
+
+
+
+  # Error Message 4 (additional error code)
+#  - platform: modbus_controller
+#    modbus_controller_id: skyline
+#    name: "Error Message 4"
+#    id: error_message_4
+#    register_type: holding
+#    address: 0x2013
+#    state_class: measurement
+#    accuracy_decimals: 0
+
+
+  # Power Sensors (0x1001-0x1040 range)
+#  - platform: modbus_controller
+#    modbus_controller_id: skyline
+#    name: "Inverter Load L1"
+#    id: inverter_load_l1
+#    register_type: holding
+#    address: 0x1001
+#    unit_of_measurement: "kW"
+#    device_class: power
+#    state_class: measurement
+#    accuracy_decimals: 2
+#    filters:
+#      - multiply: 0.0001  # Convert to kW (registers are in 0.1W)
+
+#  - platform: modbus_controller
+#    modbus_controller_id: skyline
+#    name: "Inverter Load L2"
+#    id: inverter_load_l2
+#    register_type: holding
+#    address: 0x1006
+#    unit_of_measurement: "kW"
+#    device_class: power
+#    state_class: measurement
+#    accuracy_decimals: 2
+#    filters:
+#      - multiply: 0.0001
+
+#  - platform: modbus_controller
+#    modbus_controller_id: skyline
+#    name: "Inverter Load L3"
+#    id: inverter_load_l3
+#    register_type: holding
+#    address: 0x100B
+#    unit_of_measurement: "kW"
+#    device_class: power
+#    state_class: measurement
+#    accuracy_decimals: 2
+#    filters:
+#      - multiply: 0.0001
+
+  # MPPT1 Voltage and Current
+# Returns zero
+#  - platform: modbus_controller
+#    modbus_controller_id: skyline
+#    name: "MPPT1 Voltage"
+#    id: mppt1_voltage
+#    register_type: holding
+#    address: 0x100E
+#    unit_of_measurement: "V"
+#    device_class: voltage
+#    state_class: measurement
+#    accuracy_decimals: 0
+#    filters:
+#      - multiply: 0.1
+
+#  - platform: modbus_controller
+#    modbus_controller_id: skyline
+#    name: "MPPT1 Current"
+#    id: mppt1_current
+#    register_type: holding
+#    address: 0x100F
+#    unit_of_measurement: "A"
+#    device_class: current
+#    state_class: measurement
+#    accuracy_decimals: 0
+#    filters:
+#      - multiply: 0.01
+
+  # MPPT1 Power
+#  - platform: modbus_controller
+#    modbus_controller_id: skyline
+#    name: "MPPT1 Power"
+#    id: mppt1_power
+#    register_type: holding
+#    address: 0x1010
+#    register_count: 2
+#    response_size: 4
+#    unit_of_measurement: "W"
+#    device_class: power
+#    state_class: measurement
+#    accuracy_decimals: 0
+#    value_type: U_DWORD
+#    filters:
+#      - multiply: 0.1
+
+  # MPPT2 Voltage and Current
+# Returns zero
+#  - platform: modbus_controller
+#    modbus_controller_id: skyline
+#    name: "MPPT2 Voltage"
+#    id: mppt2_voltage
+#    register_type: holding
+#    address: 0x1012
+#    unit_of_measurement: "V"
+#    device_class: voltage
+#    state_class: measurement
+#    accuracy_decimals: 0
+#    filters:
+#      - multiply: 0.1
+
+#  - platform: modbus_controller
+#    modbus_controller_id: skyline
+#    name: "MPPT2 Current"
+#    id: mppt2_current
+#    register_type: holding
+#    address: 0x1013
+#    unit_of_measurement: "A"
+#    device_class: current
+#    state_class: measurement
+#    accuracy_decimals: 0
+#    filters:
+#      - multiply: 0.01
+
+  # MPPT2 Power
+#  - platform: modbus_controller
+#    modbus_controller_id: skyline
+#    name: "MPPT2 Power"
+#    id: mppt2_power
+#    register_type: holding
+#    address: 0x1014
+#    register_count: 2
+#    response_size: 4
+#    unit_of_measurement: "W"
+#    device_class: power
+#    state_class: measurement
+#    accuracy_decimals: 0
+#    value_type: U_DWORD
+#    filters:
+#      - multiply: 0.1
+
+  # Total PV Power (template sensor combining MPPT1 and MPPT2)
+#  - platform: template
+#    name: "PV Power"
+#    id: pv_power
+#    unit_of_measurement: "kW"
+#    device_class: power
+#    state_class: measurement
+#    accuracy_decimals: 0
+#    lambda: |-
+#      return id(mppt1_power).state + id(mppt2_power).state;
+
