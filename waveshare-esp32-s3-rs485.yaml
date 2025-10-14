@@ -1,0 +1,75 @@
+# Use this config if using a Waveshare ESP32 S3 RS485 board
+# Check the readme.md
+substitutions:
+  name: durai_inverter
+  friendly_name: Duracell Durai
+packages:
+  GI1MIC.homeassistant_durai: github://gi1mic/homeassistant_durai/durai.yaml
+esphome:
+  name: ${name}
+  name_add_mac_suffix: false
+  friendly_name: ${friendly_name}
+  on_boot:
+    then:
+      pcf85063.read_time:       # read the RTC time once when the system boots
+
+esp32:
+  board: lolin_s3
+  variant: esp32s3
+
+api:
+  encryption:
+    key: dhH+eNC/IBuBSTsLtuxceHvtPhigARCAyCr0o5F4y/I=
+
+ota:
+  - platform: esphome
+    password: "YOUR-PASSWORD"
+    
+wifi:
+  ssid: !secret wifi_ssid
+  password: !secret wifi_password
+
+
+# Waveshare ESP32-S3 RS485 pinout
+# IO17 RS485 TX
+# IO18 RS485 RX
+# IO21 RS485 Enable
+# IO15 CAN TX
+# IO16 CAN RX
+# IO38 RTC_SCL (PCF85063AT)
+# IO39 RTC_SDA (PCF85063AT)
+# IO40 RTC_INT (PCF85063AT)
+
+# UART 
+uart:
+  id: uart_1
+  tx_pin: GPIO17
+  rx_pin: GPIO18
+  baud_rate: 9600
+  data_bits: 8
+  parity: NONE
+  stop_bits: 1
+
+# MODBUS client over UART.
+modbus:
+  id: mod_bus
+  uart_id: uart_1
+  role: client
+  flow_control_pin: GPIO21  # Used on the Waveshare ESP32-S3 module - comment out if not required
+
+# i2c Req for pcf85063
+i2c:
+  sda: GPIO39
+  scl: GPIO38
+  scan: true
+  id: bus_a
+
+time:
+  - platform: pcf85063
+    update_interval: never  # repeated synchronization is unnecessary unless the external RTC is much more accurate
+  - platform: homeassistant
+    on_time_sync:     # Try to synchronize via network repeatedly ...
+      then:
+        pcf85063.write_time:  # ... and update the RTC when the synchronization is successful
+
+
